@@ -47,13 +47,11 @@ function statement (invoice, plays) {
     let result = `Statement for ${invoice.customer}\n`;
 
     for (let perf of invoice.performances) {
-        const thisAmount = amountFor(perf);
-
         volumeCredits += volumeCreditsFor(perf);
 
         // print line for this order
-        result += `  ${playFor(perf).name}: ${(usd(thisAmount))} (${perf.audience} seats)\n`;
-        totalAmount += thisAmount;
+        result += `  ${playFor(perf).name}: ${(usd(amountFor(perf)))} (${perf.audience} seats)\n`;
+        totalAmount += amountFor(perf);
     }
     result += `Amount owed is ${usd(totalAmount)}\n`;
     result += `You earned ${volumeCredits} credits\n`;
