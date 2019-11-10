@@ -1,6 +1,6 @@
 export {statement}
 
-function renderPlainText(data, plays) {
+function renderPlainText(data) {
     let result = `Statement for ${data.customer}\n`;
     for (let perf of data.performances) {
         result += `  ${perf.play.name}: ${(usd(amountFor(perf)))} (${perf.audience} seats)\n`;
@@ -70,7 +70,7 @@ function statement (invoice, plays) {
     const statementData = {};
     statementData.customer = invoice.customer;
     statementData.performances = invoice.performances.map(enrichPerformance);
-    return renderPlainText(statementData, plays);
+    return renderPlainText(statementData);
 
     function playFor(perf) {
         return plays[perf.playID];
