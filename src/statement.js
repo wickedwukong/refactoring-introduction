@@ -8,10 +8,10 @@ function statement (invoice, plays) {
         { style: "currency", currency: "USD",
             minimumFractionDigits: 2 }).format;
 
-    function amountFor(aPlay, aPerformance) {
+    function amountFor(aPerformance) {
         let result = 0;
 
-        switch (aPlay.type) {
+        switch (playFor(aPerformance).type) {
             case "tragedy":
                 result = 40000;
                 if (aPerformance.audience > 30) {
@@ -26,7 +26,7 @@ function statement (invoice, plays) {
                 result += 300 * aPerformance.audience;
                 break;
             default:
-                throw new Error(`unknown type: ${aPlay.type}`);
+                throw new Error(`unknown type: ${playFor(aPerformance).type}`);
         }
         return result;
     }
@@ -36,7 +36,7 @@ function statement (invoice, plays) {
     }
 
     for (let perf of invoice.performances) {
-        let thisAmount = amountFor(playFor(perf), perf);
+        let thisAmount = amountFor(perf);
 
         // add volume credits
         volumeCredits += Math.max(perf.audience - 30, 0);
