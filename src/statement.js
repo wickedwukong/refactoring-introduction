@@ -3,7 +3,7 @@ export {statement}
 function renderPlainText(statementData, plays) {
     let result = `Statement for ${statementData.customer}\n`;
     for (let perf of statementData.performances) {
-        result += `  ${perf.play.name}: ${usd(amountFor(perf))} (${perf.audience} seats)\n`;
+        result += `  ${perf.play.name}: ${usd(perf.amount)} (${perf.audience} seats)\n`;
     }
 
     result += `Amount owed is ${usd(totalAmount())}\n`;
@@ -13,7 +13,7 @@ function renderPlainText(statementData, plays) {
     function totalAmount() {
         let totalAmount = 0;
         for (let perf of statementData.performances) {
-            totalAmount += amountFor(perf);
+            totalAmount += perf.amount;
         }
         return totalAmount;
     }
@@ -41,7 +41,22 @@ function renderPlainText(statementData, plays) {
         }
         return volumeCredits;
     }
+}
 
+
+function statement(invoice, plays) {
+    let statementData = {};
+    statementData.customer = invoice.customer;
+    statementData.performances = invoice.performances.map(enrichPerformance);
+    return renderPlainText(statementData, plays);
+
+    function enrichPerformance(aPerformance) {
+        let performance = Object.assign({}, aPerformance);
+        performance.play = playFor(performance);
+        performance.amount = amountFor(performance);
+
+        return performance;
+    }
 
     function amountFor(aPerformance) {
         let result = 0;
@@ -65,20 +80,7 @@ function renderPlainText(statementData, plays) {
         }
         return result;
     }
-}
 
-
-function statement(invoice, plays) {
-    let statementData = {};
-    statementData.customer = invoice.customer;
-    statementData.performances = invoice.performances.map(enrichPerformance);
-    return renderPlainText(statementData, plays);
-
-    function enrichPerformance(aPerformance) {
-        let performance = Object.assign({}, aPerformance);
-        performance.play = playFor(performance);
-        return performance;
-    }
 
     function playFor(aPerformance) {
         return plays[aPerformance.playID];
