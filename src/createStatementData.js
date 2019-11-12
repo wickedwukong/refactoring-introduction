@@ -1,11 +1,12 @@
 class PerformanceCalculator {
-    constructor(aPerformance) {
+    constructor(aPerformance, play) {
         this.performance = aPerformance;
+        this.play = play;
     }
 
     get amount() {
         let result = 0;
-        switch (this.performance.play.type) {
+        switch (this.play.type) {
             case "tragedy":
                 result = 40000;
                 if (this.performance.audience > 30) {
@@ -20,7 +21,7 @@ class PerformanceCalculator {
                 result += 300 * this.performance.audience;
                 break;
             default:
-                throw new Error(`unknown type: ${this.performance.play.type}`);
+                throw new Error(`unknown type: ${this.play.type}`);
         }
         return result;
     }
@@ -29,15 +30,30 @@ class PerformanceCalculator {
         let volumeCredits = 0;
         volumeCredits += Math.max(this.performance.audience - 30, 0);
 
-        if ("comedy" === this.performance.play.type) volumeCredits += Math.floor(this.performance.audience / 5);
+        if ("comedy" === this.play.type) volumeCredits += Math.floor(this.performance.audience / 5);
         return volumeCredits
     }
 
 
 }
 
-function createPerformanceCalculator(aPerformance) {
-    return new PerformanceCalculator(aPerformance);
+function createPerformanceCalculator(aPerformance, aPlay) {
+    switch (aPlay.type) {
+        case "tragedy":
+            return new TragedyPerformanceCalculator(aPerformance, aPlay);
+        case "comedy":
+            return new ComedyPerformanceCalculator(aPerformance, aPlay);
+        default:
+            throw new Error(`unknown type: ${aPlay.type}`);
+    }
+}
+
+class TragedyPerformanceCalculator extends PerformanceCalculator {
+
+}
+
+class ComedyPerformanceCalculator extends PerformanceCalculator {
+
 }
 
 export function createStatementData(invoice, plays) {
@@ -50,7 +66,7 @@ export function createStatementData(invoice, plays) {
 
     function enrichPerformance(aPerformance) {
         let performance = Object.assign({}, aPerformance);
-        const calculator = createPerformanceCalculator(aPerformance);
+        const calculator = createPerformanceCalculator(aPerformance, playFor(performance));
         performance.play = playFor(performance);
         performance.amount = calculator.amount;
         performance.volumeCredits = calculator.volumeCredits;
