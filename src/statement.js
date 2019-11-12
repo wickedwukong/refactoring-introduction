@@ -19,15 +19,22 @@ function renderPlainText(statementData) {
     }
 }
 
-
-function statement(invoice, plays) {
+function createStatementData(invoice, plays) {
     let statementData = {};
     statementData.customer = invoice.customer;
     statementData.performances = invoice.performances.map(enrichPerformance);
     statementData.totalAmount = totalAmount(statementData);
     statementData.totalVolumeCredits = totalVolumeCredits(statementData);
-    return renderPlainText(statementData);
+    return statementData;
 
+    function enrichPerformance(aPerformance) {
+        let performance = Object.assign({}, aPerformance);
+        performance.play = playFor(performance);
+        performance.amount = amountFor(performance);
+        performance.volumeCredits = volumeCreditsFor(performance);
+
+        return performance;
+    }
 
     function totalVolumeCredits(data) {
         let volumeCredits = 0;
@@ -45,15 +52,6 @@ function statement(invoice, plays) {
         return totalAmount;
     }
 
-
-    function enrichPerformance(aPerformance) {
-        let performance = Object.assign({}, aPerformance);
-        performance.play = playFor(performance);
-        performance.amount = amountFor(performance);
-        performance.volumeCredits = volumeCreditsFor(performance);
-
-        return performance;
-    }
 
     function volumeCreditsFor(aPerformance) {
         let volumeCredits = 0;
@@ -86,9 +84,12 @@ function statement(invoice, plays) {
         return result;
     }
 
-
     function playFor(aPerformance) {
         return plays[aPerformance.playID];
     }
+}
 
+
+function statement(invoice, plays) {
+    return renderPlainText(createStatementData(invoice, plays));
 }
