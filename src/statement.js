@@ -38,10 +38,10 @@ export {statement}
 // Amount owed is $1,730.00
 // You earned 47 credits
 
-function renderPlainText(statementData, invoice, plays) {
+function renderPlainText(statementData, plays) {
     let result = `Statement for ${statementData.customer}\n`;
 
-    for (let perf of invoice.performances) {
+    for (let perf of statementData.performances) {
         result += `  ${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${perf.audience} seats)\n`;
     }
 
@@ -51,7 +51,7 @@ function renderPlainText(statementData, invoice, plays) {
 
     function totalAmount() {
         let result = 0;
-        for (let perf of invoice.performances) {
+        for (let perf of statementData.performances) {
             result += amountFor(perf);
         }
         return result;
@@ -59,7 +59,7 @@ function renderPlainText(statementData, invoice, plays) {
 
     function totalVolumeCredits() {
         let result = 0;
-        for (let perf of invoice.performances) {
+        for (let perf of statementData.performances) {
             result += volumeCreditsFor(perf);
         }
         return result;
@@ -112,5 +112,6 @@ function renderPlainText(statementData, invoice, plays) {
 function statement(invoice, plays) {
     const statementData = {};
     statementData.customer = invoice.customer;
-    return renderPlainText(statementData, invoice, plays);
+    statementData.performances = invoice.performances;
+    return renderPlainText(statementData, plays);
 }
