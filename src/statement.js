@@ -42,7 +42,7 @@ function renderPlainText(statementData, plays) {
     let result = `Statement for ${statementData.customer}\n`;
 
     for (let perf of statementData.performances) {
-        result += `  ${perf.play.name}: ${usd(amountFor(perf) / 100)} (${perf.audience} seats)\n`;
+        result += `  ${perf.play.name}: ${usd(perf.amount / 100)} (${perf.audience} seats)\n`;
     }
 
     result += `Amount owed is ${usd(totalAmount() / 100)}\n`;
@@ -52,7 +52,7 @@ function renderPlainText(statementData, plays) {
     function totalAmount() {
         let result = 0;
         for (let perf of statementData.performances) {
-            result += amountFor(perf);
+            result += perf.amount;
         }
         return result;
     }
@@ -72,7 +72,28 @@ function renderPlainText(statementData, plays) {
                 minimumFractionDigits: 2
             }).format(value);
     }
+    
+    function volumeCreditsFor(aPerformance) {
+        let volumeCredits = 0;
+        volumeCredits += Math.max(aPerformance.audience - 30, 0);
+        if ("comedy" === aPerformance.play.type) volumeCredits += Math.floor(aPerformance.audience / 5);
+        return volumeCredits;
+    }
+}
 
+
+function statement(invoice, plays) {
+    const statementData = {};
+    statementData.customer = invoice.customer;
+    statementData.performances = invoice.performances.map(enhancePerformance);
+    return renderPlainText(statementData, plays);
+
+    function enhancePerformance(aPerformance) {
+        let result = Object.assign({}, aPerformance);
+        result.play = playFor(result);
+        result.amount = amountFor(result);
+        return result;
+    }
 
     function amountFor(aPerformance) {
         let result = 0;
@@ -97,27 +118,6 @@ function renderPlainText(statementData, plays) {
         return result;
     }
 
-    function volumeCreditsFor(aPerformance) {
-        let volumeCredits = 0;
-        volumeCredits += Math.max(aPerformance.audience - 30, 0);
-        if ("comedy" === aPerformance.play.type) volumeCredits += Math.floor(aPerformance.audience / 5);
-        return volumeCredits;
-    }
-}
-
-
-
-function statement(invoice, plays) {
-    const statementData = {};
-    statementData.customer = invoice.customer;
-    statementData.performances = invoice.performances.map(enhancePerformance);
-    return renderPlainText(statementData, plays);
-
-    function enhancePerformance(aPerformance) {
-        let result = Object.assign({}, aPerformance);
-        result.play = playFor(result);
-        return result;
-    }
 
     function playFor(perf) {
         return plays[perf.playID];
