@@ -42,7 +42,7 @@ function renderPlainText(statementData, plays) {
     let result = `Statement for ${statementData.customer}\n`;
 
     for (let perf of statementData.performances) {
-        result += `  ${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${perf.audience} seats)\n`;
+        result += `  ${perf.play.name}: ${usd(amountFor(perf) / 100)} (${perf.audience} seats)\n`;
     }
 
     result += `Amount owed is ${usd(totalAmount() / 100)}\n`;
@@ -77,7 +77,7 @@ function renderPlainText(statementData, plays) {
     function amountFor(aPerformance) {
         let result = 0;
 
-        switch (playFor(aPerformance).type) {
+        switch (aPerformance.play.type) {
             case "tragedy":
                 result = 40000;
                 if (aPerformance.audience > 30) {
@@ -92,7 +92,7 @@ function renderPlainText(statementData, plays) {
                 result += 300 * aPerformance.audience;
                 break;
             default:
-                throw new Error(`unknown type: ${playFor(aPerformance).type}`);
+                throw new Error(`unknown type: ${aPerformance.play.type}`);
         }
         return result;
     }
@@ -100,18 +100,27 @@ function renderPlainText(statementData, plays) {
     function volumeCreditsFor(aPerformance) {
         let volumeCredits = 0;
         volumeCredits += Math.max(aPerformance.audience - 30, 0);
-        if ("comedy" === playFor(aPerformance).type) volumeCredits += Math.floor(aPerformance.audience / 5);
+        if ("comedy" === aPerformance.play.type) volumeCredits += Math.floor(aPerformance.audience / 5);
         return volumeCredits;
+    }
+}
+
+
+
+function statement(invoice, plays) {
+    const statementData = {};
+    statementData.customer = invoice.customer;
+    statementData.performances = invoice.performances.map(enhancePerformance);
+    return renderPlainText(statementData, plays);
+
+    function enhancePerformance(aPerformance) {
+        let result = Object.assign({}, aPerformance);
+        result.play = playFor(result);
+        return result;
     }
 
     function playFor(perf) {
         return plays[perf.playID];
     }
-}
 
-function statement(invoice, plays) {
-    const statementData = {};
-    statementData.customer = invoice.customer;
-    statementData.performances = invoice.performances;
-    return renderPlainText(statementData, plays);
 }
