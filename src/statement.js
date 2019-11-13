@@ -38,7 +38,7 @@ export {statement}
 // Amount owed is $1,730.00
 // You earned 47 credits
 
-function renderPlainText(statementData, plays) {
+function renderPlainText(statementData) {
     let result = `Statement for ${statementData.customer}\n`;
 
     for (let perf of statementData.performances) {
@@ -48,7 +48,7 @@ function renderPlainText(statementData, plays) {
     result += `Amount owed is ${usd(statementData.totalAmount / 100)}\n`;
     result += `You earned ${(statementData.totalVolumeCredits)} credits\n`;
     return result;
-    
+
     function usd(value) {
         return new Intl.NumberFormat("en-US",
             {
@@ -57,15 +57,13 @@ function renderPlainText(statementData, plays) {
             }).format(value);
     }
 }
-
-
-function statement(invoice, plays) {
+function createStatementData(invoice, plays) {
     const statementData = {};
     statementData.customer = invoice.customer;
     statementData.performances = invoice.performances.map(enhancePerformance);
     statementData.totalAmount = totalAmount(statementData);
     statementData.totalVolumeCredits = totalVolumeCredits(statementData);
-    return renderPlainText(statementData, plays);
+    return statementData;
 
     function enhancePerformance(aPerformance) {
         let result = Object.assign({}, aPerformance);
@@ -126,5 +124,8 @@ function statement(invoice, plays) {
     function playFor(perf) {
         return plays[perf.playID];
     }
+}
 
+function statement(invoice, plays) {
+    return renderPlainText(createStatementData(invoice, plays));
 }
