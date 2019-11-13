@@ -36,6 +36,23 @@ class PerformanceCalculator {
     }
 }
 
+class TragedyCalculator extends PerformanceCalculator{
+}
+
+class ComedyCalculator extends PerformanceCalculator{
+}
+
+function createPerformanceCalculator(aPerformance, aPlay) {
+    switch (aPlay.type) {
+        case "tragedy":
+            return new TragedyCalculator(aPerformance, aPlay);
+        case "comedy":
+            return new ComedyCalculator(aPerformance, aPlay);
+        default:
+            throw new Error(`unknown type: ${this.play.type}`);
+    }
+}
+
 export function createStatementData(invoice, plays) {
     const statementData = {};
     statementData.customer = invoice.customer;
@@ -46,7 +63,7 @@ export function createStatementData(invoice, plays) {
 
     function enhancePerformance(aPerformance) {
         let result = Object.assign({}, aPerformance);
-        const performanceCalculator = new PerformanceCalculator(aPerformance, playFor(result));
+        const performanceCalculator = createPerformanceCalculator(aPerformance, playFor(aPerformance));
         result.play = performanceCalculator.play;
         result.amount = performanceCalculator.amount;
         result.volumeCredits = performanceCalculator.volumeCredits;
