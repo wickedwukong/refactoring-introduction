@@ -39,7 +39,7 @@ export {statement}
 // Amount owed is $1,730.00
 // You earned 47 credits
 
-function statement(invoice, plays) {
+function renderPlainText(invoice, plays) {
     let result = `Statement for ${invoice.customer}\n`;
 
     for (let perf of invoice.performances) {
@@ -47,12 +47,12 @@ function statement(invoice, plays) {
     }
 
     result += `Amount owed is ${usd(totalAmount() / 100)}\n`;
-    result += `You earned ${(totalVolumeCredits(invoice.performances))} credits\n`;
+    result += `You earned ${(totalVolumeCredits())} credits\n`;
     return result;
 
-    function totalVolumeCredits(performances) {
+    function totalVolumeCredits() {
         let volumeCredits = 0;
-        for (let perf of performances) {
+        for (let perf of invoice.performances) {
             volumeCredits += volumeCreditsFor(perf);
         }
         return volumeCredits;
@@ -80,10 +80,10 @@ function statement(invoice, plays) {
         return plays[perf.playID];
     }
 
-    function volumeCreditsFor(perf) {
+    function volumeCreditsFor(aPerformance) {
         let result = 0;
-        result += Math.max(perf.audience - 30, 0);
-        if ("comedy" === playFor(perf).type) result += Math.floor(perf.audience / 5);
+        result += Math.max(aPerformance.audience - 30, 0);
+        if ("comedy" === playFor(aPerformance).type) result += Math.floor(aPerformance.audience / 5);
         return result;
     }
 
@@ -110,6 +110,8 @@ function statement(invoice, plays) {
         }
         return result;
     }
+}
 
-
+function statement(invoice, plays) {
+    return renderPlainText(invoice, plays);
 }
