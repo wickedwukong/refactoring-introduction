@@ -43,10 +43,10 @@ function renderPlainText(data, plays) {
     let result = `Statement for ${data.customer}\n`;
 
     for (let perf of data.performances) {
-        result += `  ${perf.play.name}: ${usd(amountFor(perf) / 100)} (${perf.audience} seats)\n`;
+        result += `  ${perf.play.name}: ${usd(perf.amount / 100)} (${perf.audience} seats)\n`;
     }
 
-    result += `Amount owed is ${usd(totalAmount() / 100)}\n`;
+    result += `Amount owed is ${usd(data.totalAmount / 100)}\n`;
     result += `You earned ${(totalVolumeCredits())} credits\n`;
     return result;
 
@@ -61,7 +61,7 @@ function renderPlainText(data, plays) {
     function totalAmount() {
         let totalAmount = 0;
         for (let perf of data.performances) {
-            totalAmount += amountFor(perf);
+            totalAmount += perf.amount;
         }
         return totalAmount;
     }
@@ -81,7 +81,35 @@ function renderPlainText(data, plays) {
         if ("comedy" === aPerformance.play.type) result += Math.floor(aPerformance.audience / 5);
         return result;
     }
+}
 
+function statement(invoice, plays) {
+    const statementDate = {};
+    statementDate.customer = invoice.customer;
+    statementDate.performances = invoice.performances.map(enhancePerformance);
+    statementDate.totalAmount = totalAmount(statementDate);
+
+    return renderPlainText(statementDate, plays);
+
+    function totalAmount(data) {
+        let totalAmount = 0;
+        for (let perf of data.performances) {
+            totalAmount += perf.amount;
+        }
+        return totalAmount;
+    }
+
+
+    function enhancePerformance(aPerformance) {
+        const performance = Object.assign({}, aPerformance);
+        performance.play = playFor(performance);
+        performance.amount = amountFor(performance);
+        return performance
+    }
+
+    function playFor(perf) {
+        return plays[perf.playID];
+    }
 
     function amountFor(aPerformance) {
         let result = 0;
@@ -105,22 +133,5 @@ function renderPlainText(data, plays) {
         }
         return result;
     }
-}
 
-function statement(invoice, plays) {
-    const statementDate = {};
-    statementDate.customer = invoice.customer;
-    statementDate.performances = invoice.performances.map(enhancePerformance);
-
-    return renderPlainText(statementDate, plays);
-
-    function enhancePerformance(aPerformance) {
-        const performance = Object.assign({}, aPerformance);
-        performance.play = playFor(performance);
-        return performance
-    }
-
-    function playFor(perf) {
-        return plays[perf.playID];
-    }
 }
