@@ -39,7 +39,7 @@ export {statement}
 // Amount owed is $1,730.00
 // You earned 47 credits
 
-function renderPlainText(data, plays) {
+function renderPlainText(data) {
     let result = `Statement for ${data.customer}\n`;
 
     for (let perf of data.performances) {
@@ -53,19 +53,10 @@ function renderPlainText(data, plays) {
     function totalVolumeCredits() {
         let volumeCredits = 0;
         for (let perf of data.performances) {
-            volumeCredits += volumeCreditsFor(perf);
+            volumeCredits += perf.volumeCredits;
         }
         return volumeCredits;
     }
-
-    function totalAmount() {
-        let totalAmount = 0;
-        for (let perf of data.performances) {
-            totalAmount += perf.amount;
-        }
-        return totalAmount;
-    }
-
 
     function usd(value) {
         const format = new Intl.NumberFormat("en-US",
@@ -75,12 +66,6 @@ function renderPlainText(data, plays) {
             }).format;
         return format(value);
     }
-    function volumeCreditsFor(aPerformance) {
-        let result = 0;
-        result += Math.max(aPerformance.audience - 30, 0);
-        if ("comedy" === aPerformance.play.type) result += Math.floor(aPerformance.audience / 5);
-        return result;
-    }
 }
 
 function statement(invoice, plays) {
@@ -89,7 +74,7 @@ function statement(invoice, plays) {
     statementDate.performances = invoice.performances.map(enhancePerformance);
     statementDate.totalAmount = totalAmount(statementDate);
 
-    return renderPlainText(statementDate, plays);
+    return renderPlainText(statementDate);
 
     function totalAmount(data) {
         let totalAmount = 0;
@@ -104,12 +89,21 @@ function statement(invoice, plays) {
         const performance = Object.assign({}, aPerformance);
         performance.play = playFor(performance);
         performance.amount = amountFor(performance);
+        performance.volumeCredits = volumeCreditsFor(performance);
         return performance
     }
 
     function playFor(perf) {
         return plays[perf.playID];
     }
+
+    function volumeCreditsFor(aPerformance) {
+        let result = 0;
+        result += Math.max(aPerformance.audience - 30, 0);
+        if ("comedy" === aPerformance.play.type) result += Math.floor(aPerformance.audience / 5);
+        return result;
+    }
+
 
     function amountFor(aPerformance) {
         let result = 0;
