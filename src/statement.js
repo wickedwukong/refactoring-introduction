@@ -47,17 +47,8 @@ function renderPlainText(data) {
     }
 
     result += `Amount owed is ${usd(data.totalAmount / 100)}\n`;
-    result += `You earned ${(totalVolumeCredits())} credits\n`;
+    result += `You earned ${(data.totalVolumeCredits)} credits\n`;
     return result;
-
-    function totalVolumeCredits() {
-        let volumeCredits = 0;
-        for (let perf of data.performances) {
-            volumeCredits += perf.volumeCredits;
-        }
-        return volumeCredits;
-    }
-
     function usd(value) {
         const format = new Intl.NumberFormat("en-US",
             {
@@ -73,6 +64,7 @@ function statement(invoice, plays) {
     statementDate.customer = invoice.customer;
     statementDate.performances = invoice.performances.map(enhancePerformance);
     statementDate.totalAmount = totalAmount(statementDate);
+    statementDate.totalVolumeCredits = totalVolumeCredits(statementDate);
 
     return renderPlainText(statementDate);
 
@@ -104,6 +96,13 @@ function statement(invoice, plays) {
         return result;
     }
 
+    function totalVolumeCredits(data) {
+        let volumeCredits = 0;
+        for (let perf of data.performances) {
+            volumeCredits += perf.volumeCredits;
+        }
+        return volumeCredits;
+    }
 
     function amountFor(aPerformance) {
         let result = 0;
